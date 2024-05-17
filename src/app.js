@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/customers', async (req, res) => {
-    try{
+    try {
         const result = await Customer.find();
         res.send({"customers": result});
     } catch(e){
@@ -38,21 +38,41 @@ app.get('/api/customers/:id', async(req, res) => {
         requestParams: req.params,
         requestQuery: req.query
     });
-    try{
+    try {
         const customerId = req.params.id;
         console.log(customerId);
         const customer = await Customer.findById(customerId);
         console.log(customer);
         if(!customer){
-            res.status(404).json({error: 'User not found'})
+            res.status(404).json({error: 'User not found'});
         } else {
             res.json({customer});
         }
-    } catch(e){
-        res.status(500).json({error: 'something went wrong'})
+    } catch(e) {
+        res.status(500).json({error: 'something went wrong'});
     }
 });
 
+app.put('/api/customers/:id', async(req, res) => {
+    try {
+        const customerId = req.params.id;
+        const result = await Customer.replaceOne({_id: customerId}, req.body);
+        console.log(result);
+        res.json({updatedCount: result.modifiedCount});
+    } catch(e) {
+       res.status(500).json({error: 'something went wrong'}); 
+    }
+});
+
+app.delete('/api/customers/:id', async(req, res) => {
+    try {
+        const customerId = req.params.id;
+        const result = await Customer.deleteOne({_id: customerId});
+        res.json({deletedCount: result.deletedCount });
+    } catch(e) {
+        res.status(500).json({error: 'something went wrong'});
+    }
+});
 
 app.post('/api/customers', async (req, res) => {
     console.log(req.body);
@@ -66,7 +86,7 @@ app.post('/api/customers', async (req, res) => {
 });
 
 const start = async() => {
-    try{
+    try {
         await mongoose.connect(CONNECTION);
     
         app.listen(PORT, () => {
@@ -75,7 +95,6 @@ const start = async() => {
     } catch(e) {
         console.log(e.message)
     }
-    
 };
 
 start();
