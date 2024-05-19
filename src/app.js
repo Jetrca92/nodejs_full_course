@@ -2,10 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const doetnv = require('dotenv');
 const Customer = require('./models/customers');
+const cors = require('cors');
 
 const app = express();
 mongoose.set('strictQuery', false);
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -56,11 +58,60 @@ app.get('/api/customers/:id', async(req, res) => {
 app.put('/api/customers/:id', async(req, res) => {
     try {
         const customerId = req.params.id;
-        const result = await Customer.replaceOne({_id: customerId}, req.body);
-        console.log(result);
-        res.json({updatedCount: result.modifiedCount});
+        const customer = await Customer.findOneAndReplace({_id: customerId}, req.body, {new: true});
+        console.log(customer);
+        res.json({customer});
     } catch(e) {
        res.status(500).json({error: 'something went wrong'}); 
+    }
+});
+
+app.patch('/api/customers/:id', async(req, res) => {
+    try {
+        const customerId = req.params.id;
+        const customer = await Customer.findOneAndUpdate({_id: customerId}, req.body, {new: true});
+        console.log(customer);
+        res.json({customer});
+    } catch(e) {
+       res.status(500).json({error: 'something went wrong'}); 
+    }
+})
+
+app.patch('/api/orders/:id', async(req, res) => {
+    console.log(req.params);
+    const orderId = req.params.id;
+    req.body._id = orderId;
+    try {
+        const result = await Customer.findOneAndUpdate(
+            { 'orders._id' : orderId },
+            { $set: { 'orders.$': req.body }},
+            { new: true }
+        );
+
+        console.log(result);
+
+        if(result){
+            res.json(result);
+        } else {
+            res.status(404).json({error: 'Something went wrong'});
+        }
+    } catch (e) {
+        console.log(e.message);
+       res.status(500).json({error: 'something went wrong'}); 
+    }
+});
+
+app.get('/api/orders/:id', async(req, res) => {
+    try {
+        const result = await Customer.findOne({'orders._id': req.params.id})
+        if(result){
+            res.json(result);
+        } else {
+            res.status(404).json({error: 'order not found'});
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({error: 'something went wrong'});
     }
 });
 
