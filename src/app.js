@@ -1,41 +1,45 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 const express = require('express');
 const mongoose = require('mongoose');
 const doetnv = require('dotenv');
-const Customer = require('./models/customers');
+const customers_1 = __importDefault(require("./models/customers"));
 const cors = require('cors');
-
 const app = express();
 mongoose.set('strictQuery', false);
-
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-if(process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
     doetnv.config();
 }
 const PORT = process.env.PORT || 3000;
-const CONNECTION = process.env.CONNECTION
-
-const customer = new Customer({
-    name: 'caleb',
-    industry: 'farming'
-});
-
+const CONNECTION = process.env.CONNECTION;
 app.get('/', (req, res) => {
     res.send("Welcome!");
 });
-
-app.get('/api/customers', async (req, res) => {
+app.get('/api/customers', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = await Customer.find();
-        res.send({"customers": result});
-    } catch(e){
-        res.status(500).json({error: e.message})
-    } 
-});
-
-app.get('/api/customers/:id', async(req, res) => {
+        const result = yield customers_1.default.find();
+        res.send({ "customers": result });
+    }
+    catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+}));
+app.get('/api/customers/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log({
         requestParams: req.params,
         requestQuery: req.query
@@ -43,109 +47,105 @@ app.get('/api/customers/:id', async(req, res) => {
     try {
         const customerId = req.params.id;
         console.log(customerId);
-        const customer = await Customer.findById(customerId);
+        const customer = yield customers_1.default.findById(customerId);
         console.log(customer);
-        if(!customer){
-            res.status(404).json({error: 'User not found'});
-        } else {
-            res.json({customer});
+        if (!customer) {
+            res.status(404).json({ error: 'User not found' });
         }
-    } catch(e) {
-        res.status(500).json({error: 'something went wrong'});
+        else {
+            res.json({ customer });
+        }
     }
-});
-
-app.put('/api/customers/:id', async(req, res) => {
+    catch (e) {
+        res.status(500).json({ error: 'something went wrong' });
+    }
+}));
+app.put('/api/customers/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const customerId = req.params.id;
-        const customer = await Customer.findOneAndReplace({_id: customerId}, req.body, {new: true});
+        const customer = yield customers_1.default.findOneAndReplace({ _id: customerId }, req.body, { new: true });
         console.log(customer);
-        res.json({customer});
-    } catch(e) {
-       res.status(500).json({error: 'something went wrong'}); 
+        res.json({ customer });
     }
-});
-
-app.patch('/api/customers/:id', async(req, res) => {
+    catch (e) {
+        res.status(500).json({ error: 'something went wrong' });
+    }
+}));
+app.patch('/api/customers/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const customerId = req.params.id;
-        const customer = await Customer.findOneAndUpdate({_id: customerId}, req.body, {new: true});
+        const customer = yield customers_1.default.findOneAndUpdate({ _id: customerId }, req.body, { new: true });
         console.log(customer);
-        res.json({customer});
-    } catch(e) {
-       res.status(500).json({error: 'something went wrong'}); 
+        res.json({ customer });
     }
-})
-
-app.patch('/api/orders/:id', async(req, res) => {
+    catch (e) {
+        res.status(500).json({ error: 'something went wrong' });
+    }
+}));
+app.patch('/api/orders/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req.params);
     const orderId = req.params.id;
     req.body._id = orderId;
     try {
-        const result = await Customer.findOneAndUpdate(
-            { 'orders._id' : orderId },
-            { $set: { 'orders.$': req.body }},
-            { new: true }
-        );
-
+        const result = yield customers_1.default.findOneAndUpdate({ 'orders._id': orderId }, { $set: { 'orders.$': req.body } }, { new: true });
         console.log(result);
-
-        if(result){
+        if (result) {
             res.json(result);
-        } else {
-            res.status(404).json({error: 'Something went wrong'});
         }
-    } catch (e) {
+        else {
+            res.status(404).json({ error: 'Something went wrong' });
+        }
+    }
+    catch (e) {
         console.log(e.message);
-       res.status(500).json({error: 'something went wrong'}); 
+        res.status(500).json({ error: 'something went wrong' });
     }
-});
-
-app.get('/api/orders/:id', async(req, res) => {
+}));
+app.get('/api/orders/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = await Customer.findOne({'orders._id': req.params.id})
-        if(result){
+        const result = yield customers_1.default.findOne({ 'orders._id': req.params.id });
+        if (result) {
             res.json(result);
-        } else {
-            res.status(404).json({error: 'order not found'});
         }
-    } catch (e) {
-        console.log(e);
-        res.status(500).json({error: 'something went wrong'});
+        else {
+            res.status(404).json({ error: 'order not found' });
+        }
     }
-});
-
-app.delete('/api/customers/:id', async(req, res) => {
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: 'something went wrong' });
+    }
+}));
+app.delete('/api/customers/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const customerId = req.params.id;
-        const result = await Customer.deleteOne({_id: customerId});
-        res.json({deletedCount: result.deletedCount });
-    } catch(e) {
-        res.status(500).json({error: 'something went wrong'});
+        const result = yield customers_1.default.deleteOne({ _id: customerId });
+        res.json({ deletedCount: result.deletedCount });
     }
-});
-
-app.post('/api/customers', async (req, res) => {
+    catch (e) {
+        res.status(500).json({ error: 'something went wrong' });
+    }
+}));
+app.post('/api/customers', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req.body);
-    const customer = new Customer(req.body);
-    try{
-        await customer.save();
-        res.status(201).json({customer})
-    } catch(e) {
-        res.status(400).json({error: e.message});
-    }
-});
-
-const start = async() => {
+    const customer = new customers_1.default(req.body);
     try {
-        await mongoose.connect(CONNECTION);
-    
+        yield customer.save();
+        res.status(201).json({ customer });
+    }
+    catch (e) {
+        res.status(400).json({ error: e.message });
+    }
+}));
+const start = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield mongoose.connect(CONNECTION);
         app.listen(PORT, () => {
             console.log('App listening on port ' + PORT);
         });
-    } catch(e) {
-        console.log(e.message)
     }
-};
-
+    catch (e) {
+        console.log(e.message);
+    }
+});
 start();
